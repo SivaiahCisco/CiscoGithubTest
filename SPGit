@@ -1,2 +1,70 @@
-git test
-Sharepoint connection 
+Github Sample file Data:
+
+Sharepoint to github connection has been successfully verified.
+
+Below are the React js code to connect github web api from sharepoint spfx web part.
+
+import * as React from 'react';
+import { TextField } from 'office-ui-fabric-react/lib/TextField';
+import { DefaultButton, PrimaryButton} from 'office-ui-fabric-react';
+import styles from './GithubPoc.module.scss';
+import { IGithubPocProps } from './IGithubPocProps';
+import { escape } from '@microsoft/sp-lodash-subset';
+import axios from 'axios';
+
+export default class GithubPoc extends React.Component<IGithubPocProps, any> {
+
+constructor(props) {
+    super(props);
+    this.state = {githubUrl: '', response:[], showTextField:true, filepath:''}
+  }
+
+handleSubmit=(event)=> {
+  this.setState({githubUrl: event});
+  }
+
+filepathSubmit=(event)=> {
+  this.setState({filepath: event});
+}
+
+fetchData = () =>{
+  if(this.state.githubUrl != '' && this.state.filepath != '')
+  {
+    this.setState({showTextField : true}, () => {
+      // fetch('https://ciscodataserviceapi20200108112931.azurewebsites.net/api/cds?repository=sivaiahcisco/ciscogithubtest&filepath=SPGit', {
+      //   crossDomain:true,
+      //   method: 'GET',
+      //   headers: {'Content-Type':'application/json'}
+      // })
+      // .then(response => response.json())
+      // .then(gitResponse => this.setState({response: gitResponse, showTextField: false}));      
+      // });
+
+      axios.get(`https://ciscodataserviceapi20200108112931.azurewebsites.net/api/cds?repository=${this.state.githubUrl}&filepath=${this.state.filepath}`)
+      .then(res => {
+        const gitResponse = res.data.ResponseData;
+        console.log(gitResponse);
+        this.setState({response: gitResponse, showTextField: false})
+      })
+    })
+    
+  }
+}
+
+  public render(): React.ReactElement<IGithubPocProps> {
+
+    return (
+            <div className={ styles.column }>
+              {this.state.showTextField === true ?
+              <><TextField value={this.state.githubUrl} onChanged={(e) => this.handleSubmit(e)} label="Github Repository (Sample: gituser/repository)" />
+              <p><TextField value={this.state.filepath} onChanged={(e) => this.filepathSubmit(e)} label="FilePath (Sample: folder/file or file)" /></p>
+              <PrimaryButton text="Get Data" onClick={() => this.fetchData()} /></>:
+              <div dangerouslySetInnerHTML={{ __html: this.state.response}} />}
+            </div>
+    );
+  }
+}
+
+
+
+ 
